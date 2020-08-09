@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:util="http://www.springframework.org/schema/util"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd  http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-4.0.xsd">
+
+    <bean id="person01" class="pt.joja.bean.Person">
+        <property name="lastName">
+            <null/>
+        </property>
+        <!--        <property name="car" ref="car01" />-->
+        <property name="car">
+            <bean id="car02" class="pt.joja.bean.Car">
+                <property name="carName" value="Toyota"/>
+                <property name="color" value="black"/>
+                <property name="price" value="10000"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="car01" class="pt.joja.bean.Car">
+        <property name="carName" value="BWM"/>
+        <property name="color" value="Green"/>
+        <property name="price" value="30000"/>
+    </bean>
+
+    <bean id="person02" class="pt.joja.bean.Person">
+        <property name="books">
+            <list>
+                <bean id="book01" class="pt.joja.bean.Book" p:bookName="西游记"/>
+                <ref bean="book02"/>
+            </list>
+        </property>
+        <property name="maps">
+            <map>
+                <entry key="key01" value="Happiness"/>
+                <entry key="key02" value="18"/>
+                <entry key="key03" value-ref="book02"/>
+                <entry key="key04">
+                    <bean class="pt.joja.bean.Car">
+                        <property name="carName" value="HelloBike"/>
+                    </bean>
+                </entry>
+                <entry key="key05">
+                    <map></map>
+                </entry>
+            </map>
+        </property>
+        <property name="properties">
+            <props>
+                <prop key="height">175cm</prop>
+                <prop key="weight">80kg</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="book02" class="pt.joja.bean.Book">
+        <property name="bookName" value="Tale"/>
+    </bean>
+
+    <util:map id="myMap">
+        <entry key="key01" value="ele01"/>
+        <entry key="key02" value="28"/>
+    </util:map>
+
+    <bean id="person03" class="pt.joja.bean.Person">
+        <property name="maps" ref="myMap"/>
+    </bean>
+
+    <bean id="person04" class="pt.joja.bean.Person">
+        <!-- 为car赋值时改变car的price -->
+        <property name="car" ref="car01" />
+        <property name="car.price" value="50000" />
+    </bean>
+
+</beans>
