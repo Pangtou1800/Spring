@@ -9,6 +9,14 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>JojaWarehouse</artifactId>
+    <artifactId>JojaStorehouse</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.mchange</groupId>
+            <artifactId>c3p0</artifactId>
+            <version>0.9.5</version>
+        </dependency>
+    </dependencies>
 
 </project>

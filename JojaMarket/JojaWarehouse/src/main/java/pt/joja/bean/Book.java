@@ -2,6 +2,10 @@ package pt.joja.bean;
 
 public class Book {
 
+    public Book() {
+        System.out.println("New book written");
+    }
+
     private String bookName;
 
     private String author;

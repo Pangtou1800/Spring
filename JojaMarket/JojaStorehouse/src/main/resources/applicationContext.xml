@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="book00" class="pt.joja.bean.Book">
+        <constructor-arg name="name" value="Simple Life"/>
+        <constructor-arg name="author" value="Joja David"/>
+    </bean>
+
+
+    <bean id="book01" class="pt.joja.bean.Book" init-method="myInit" destroy-method="myDestroy">
+        <constructor-arg name="name" value="Catcher in the rye"/>
+        <constructor-arg name="author" value="J.D. Salinger"/>
+    </bean>
+
+    <bean id="book02" class="pt.joja.bean.Book" init-method="myInit" destroy-method="myDestroy" scope="prototype">
+        <constructor-arg name="name" value="100 healthy recipes"/>
+        <constructor-arg name="author" value="Joja Publish"/>
+    </bean>
+
+    <bean id="myBeanPostProcessor" class="pt.joja.bean.MyBeanPostProcessor" />
+
+</beans>

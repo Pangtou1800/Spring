@@ -162,6 +162,8 @@
 
     若果指定类型bean实例有一个以上，会返回NoUniqueBeanDefinitionException
 
+    而且通过类型获取可以获得该类型的所有继承类
+
 ### 3.3 通过构造器为bean的属性赋值（index, type属性介绍）
 
     通过p名称空间为bean赋值
@@ -247,7 +249,9 @@
     ·util名称空间创建集合类型的bean
 
         加入util命名空间
+
         
+
         <util:map id="myMap">
             <entry key="key01" value="ele01"/>
             <entry key="key02" value="28"/>
@@ -262,3 +266,150 @@
         <property name="car.price" value="50000" />
 
         因为是引用，所以固有对象的属性会被修改
+
+### 3.5 配置通过静态工厂方法创建的bean、实例工厂方法创建的bean、FactoryBean ☆
+
+    bean的创建，默认就是框架利用反射new出来
+
+    工厂模式：
+        不必关心创建细节，复杂的工作由工厂完成
+
+        AirPlane ap = AirPlaneFactory.getAirPlane(String jz);
+
+        ·静态工厂
+
+            - 工厂本身不需要创建对象，通过静态方法调用创建对象
+
+            <bean id="plane2" class="pt.joja.factory.AirPlaneStaticFactory" factory-method="getAirPlane">
+                <constructor-arg name="jz" value="张三"/>
+            </bean>
+
+        ·实例工厂
+
+            - 工厂本身需要被创建对象，通过工厂的实例来创建对象
+
+            <bean id="airplaneFactory" class="pt.joja.factory.AirPlaneInstanceFactory"/>
+            <bean id="plane3" class="pt.joja.bean.AirPlane" factory-bean="airplaneFactory" factory-method="getAirPlane">
+                <constructor-arg name="jz" value="张三"/>
+            </bean>
+
+        ·FactoryBean
+
+            - Spring规定的一个接口
+            - 编写实装FactoryBean的类
+            - 在Spring中注册
+
+            <bean id="myFactoryBeanImpl" class="pt.joja.factory.MyFactoryBean"/>
+
+            配置完成后用id获取时获得的是工厂创建的对象
+
+            ※IOC容器启动的时候不会创建对象实例（无论isSingleton()返回值如何）
+
+### 3.6 通过继承实现bean配置信息的重用
+
+    <bean id="person06" class="pt.joja.bean.Person" parent="person05">
+        <property name="lastName" value="张小毛"/>
+    </bean>
+
+    ※class也可以省略，但是推荐加上
+
+### 3.7 通过abstract属性创建一个模板bean
+
+    <bean id="person05" class="pt.joja.bean.Person" abstract="true">
+
+    继承专用，不可以获取实例
+    否则会抛出BeanIsAbstractException
+
+### 3.8 bean之间的依赖
+
+    普通情况下bean的创建顺序与配置顺序相同
+
+    <bean id="car" class="pt.joja.bean.Car" depends-on="book,person"></bean>
+    <bean id="person" class="pt.joja.bean.Person"></bean>
+    <bean id="book" class="pt.joja.bean.Book"></bean>
+
+    book -> person -> car
+
+### 3.9 测试bean的作用域，分别创建单实例和多实例的bean ☆
+
+    bean的作用域：指定bean是否单实例
+
+    bean的scope指定值：
+        ·singleton 单实例（默认）
+
+            - 在容器启动完场之前就创建完成
+            - 任何时候获取的都是之前创建好的对象
+
+        ·prototype 多实例
+
+            - 容器启动默认不会创建，获取时才会创建
+            - 任何时候获取的都是一个新的对象
+
+        ·request 在web环境下，同一次请求创建一个bean实例（没用）
+        ·session 在web环境下，同一次会话创建一个bean实例（没用）
+
+### 3.10 创建带有生命周期方法的bean
+
+    生命周期：
+        bean从创建到销毁
+
+        可以为bean指定一些生命周期方法，Spring在创建或者销毁bean的时候就会调用指定的方法
+
+        可以自定义初始化方法和销毁方法，但是必须是无参的
+
+        单实例：
+            容器启动 -> bean构造器创建 -> 初始化方法 -> 容器关闭 -> 销毁方法
+
+        多实例：
+            获取 -> bean构造器创建 -> 初始化方法 -> 容器关闭不会调用销毁方法
+
+### 3.11 测试bean的后置处理器
+
+    后置处理器：
+        Spring有一个接口：后置处理器 - 可以在bean的初始化前后调用方法
+
+            BeanPostProcessor
+
+        1. 编写后置处理器的类
+        2. 在Spring中注册它
+
+        在所有普通bean的初始化前后都会调用后置处理器的（无论有没有初始化方法）
+
+            - postProcessBeforeInitialization
+            - postProcessAfterInitialization
+
+    ※和Servlet的Filter很像
+
+### 3.12 引用外部属性文件 ☆
+
+    应用场景：
+        数据库连接池作为单实例是最好的，一个项目就一个连接池。
+        可以让Spring来管理连接池。
+
+    ·导包c3p0，dbdriver
+    ·在dbconfig.properties中配置好数据库连接池属性
+        jdbc.username=root
+
+    ·引用命名空间context
+        xmlns:context="http://www.springframework.org/schema/context"
+
+    ·关联外部属性文件
+        <context:property-placeholder location="classpath:dbconfig.properties" />
+
+    ·用${}取值
+        <property name="user" value="${jdbc.username}" />
+
+    注意！
+        username是Spring中的一个关键字，在配置文件中不要使用关键字username
+        username关联到的是当前登录系统的用户名
+
+### 3.13 基于XML的自动装配
+
+### 3.14 [SpEL测试I]
+
+    ·在SpEL中使用字面量
+    ·引用其他bean
+    ·引用其他bean的某个属性值
+    ·调用非静态方法
+    ·调用静态方法
+    ·使用运算符

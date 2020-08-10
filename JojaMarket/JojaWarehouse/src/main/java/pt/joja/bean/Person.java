@@ -7,7 +7,7 @@ import java.util.Properties;
 public class Person {
 
     public Person() {
-        System.out.println("new person born!");
+        System.out.println("New person born");
     }
 
     public Person(String lastName, Integer age, String gender, String email) {
@@ -15,7 +15,6 @@ public class Person {
         this.age = age;
         this.gender = gender;
         this.email = email;
-        System.out.println("有参构造器");
     }
 
     private Car car;
@@ -72,7 +71,6 @@ public class Person {
     }
 
     public void setLastName(String lastName) {
-        System.out.println(lastName + " given");
         this.lastName = lastName;
     }
 

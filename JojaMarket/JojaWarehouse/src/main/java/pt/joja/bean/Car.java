@@ -2,6 +2,10 @@ package pt.joja.bean;
 
 public class Car {
 
+    public Car() {
+        System.out.println("New car produced");
+    }
+
     private String carName;
 
     private Integer price;

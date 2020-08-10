@@ -3,13 +3,48 @@ package pt.joja;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
+import pt.joja.bean.AirPlane;
 import pt.joja.bean.Book;
 import pt.joja.bean.Car;
 import pt.joja.bean.Person;
 
 public class IOCTest {
 
-    ApplicationContext ioc = new ClassPathXmlApplicationContext("ioc2.xml");
+    ApplicationContext ioc = new ClassPathXmlApplicationContext("ioc3.xml");
+
+    @Test
+    public void test09 () {
+        System.out.println("Container completed.");
+        AirPlane ap = ioc.getBean("plane2", AirPlane.class);
+        System.out.println(ap);
+
+        AirPlane ap2 = ioc.getBean("plane3", AirPlane.class);
+        System.out.println(ap2);
+
+        AirPlane ap3 = ioc.getBean("myFactoryBeanImpl", AirPlane.class);
+        System.out.println(ap3);
+
+    }
+
+    @Test
+    public void test08() {
+        System.out.println("Container completed.");
+        Book book = ioc.getBean("book", Book.class);
+        Book book2 = ioc.getBean("book", Book.class);
+        System.out.println(book == book2);
+        Book book3 = ioc.getBean("book2", Book.class);
+        Book book4 = ioc.getBean("book2", Book.class);
+        System.out.println(book3 == book4);
+    }
+
+    @Test
+    public void test06() {
+        Person person = ioc.getBean("person06", Person.class);
+        System.out.println(person);
+
+        person = ioc.getBean("person05", Person.class);
+        System.out.println(person);
+    }
 
     @Test
     public void test05() {

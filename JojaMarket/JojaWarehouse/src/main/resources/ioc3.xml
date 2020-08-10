@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="car" class="pt.joja.bean.Car" depends-on="person"/>
+    <bean id="person" class="pt.joja.bean.Person"/>
+    <bean id="book" class="pt.joja.bean.Book" scope="prototype"/>
+    <bean id="book2" class="pt.joja.bean.Book" scope="singleton"/>
+
+    <bean id="plane" class="pt.joja.bean.AirPlane">
+        <property name="jz" value="张三"/>
+    </bean>
+
+    <bean id="plane2" class="pt.joja.factory.AirPlaneStaticFactory" factory-method="getAirPlane">
+        <constructor-arg name="jz" value="张三"/>
+    </bean>
+
+    <bean id="airplaneFactory" class="pt.joja.factory.AirPlaneInstanceFactory"/>
+    <bean id="plane3" class="pt.joja.bean.AirPlane" factory-bean="airplaneFactory" factory-method="getAirPlane">
+        <constructor-arg name="jz" value="王五"/>
+    </bean>
+
+    <bean id="myFactoryBeanImpl" class="pt.joja.factory.MyFactoryBean"/>
+</beans>

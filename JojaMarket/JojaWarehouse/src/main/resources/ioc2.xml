@@ -70,8 +70,19 @@
 
     <bean id="person04" class="pt.joja.bean.Person">
         <!-- 为car赋值时改变car的price -->
-        <property name="car" ref="car01" />
-        <property name="car.price" value="50000" />
+        <property name="car" ref="car01"/>
+        <property name="car.price" value="50000"/>
+    </bean>
+
+    <bean id="person05" class="pt.joja.bean.Person" abstract="true">
+        <property name="lastName" value="张四"/>
+        <property name="age" value="18"/>
+        <property name="gender" value="male"/>
+        <property name="email" value="zhangsi@joja.com"/>
+    </bean>
+
+    <bean id="person06" parent="person05">
+        <property name="lastName" value="张小毛"/>
     </bean>
 
 </beans>
