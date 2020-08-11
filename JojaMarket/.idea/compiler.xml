@@ -6,11 +6,13 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="JojaBarn" />
         <module name="JojaWarehouse" />
         <module name="JojaStorehouse" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="JojaBarn" target="1.8" />
       <module name="JojaMarket" target="1.8" />
       <module name="JojaStorehouse" target="1.8" />
       <module name="JojaWarehouse" target="1.8" />

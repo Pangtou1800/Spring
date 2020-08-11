@@ -405,11 +405,151 @@
 
 ### 3.13 基于XML的自动装配
 
-### 3.14 [SpEL测试I]
+    自动装配 - 自定义类型自动赋值(仅对于自定义类型有效)
+
+        - 基本类型不需要特殊指定
+        - 自定义类型的属性是一个对象，这个对象在容器中可能存在
+
+        bean的autowire属性：
+            ·default/no - 不自动装配
+            ·byName - 按照名字：以属性名作为id在容器中找到这个组件，给它赋值
+                ※如果找不到就装配null
+
+            ·byType - 按照类型：以属性的类型为依据去容器中查找这个组件
+                ※如果找不到就装配null
+                ※若果容器中有多个此类型组件，则会抛出
+                    UnsatisfiedDependencyException
+                        -> NoUniqueBeanDefinitionException
+
+                ※List<Bean>, Map<String,Bean>类型的也会自动匹配相应bean进行装配
+
+            ·constructor - 按照构造器进行赋值
+                ※需要一个有该类型的有参构造器
+                
+                匹配：
+
+                    1. 按照构造器参数类型匹配，匹配到1个就进行装配；
+                    2. 如果匹配到了多个，参数名作为id继续匹配，找到就装配；
+                    3. 不会报错
+
+### 3.14 [SpEL测试I] - Spring Expression Language
 
     ·在SpEL中使用字面量
-    ·引用其他bean
-    ·引用其他bean的某个属性值
-    ·调用非静态方法
-    ·调用静态方法
+        <property name="age" value="#{25}"/>
     ·使用运算符
+        <property name="salary" value="#{12345*12}"/>
+    ·引用其他bean
+        <property name="car" value="#{car}"/>
+    ·引用其他bean的某个属性值
+        <property name="lastName" value="#{book1.name}"/>
+    ·调用非静态方法
+        <property name="gender" value="#{book1.getName().toUpperCase()}"/>
+    ·调用静态方法
+        <property name="email" value="#{T(java.util.UUID).randomUUID().toString().substring(0,10)}@joja.com"/>
+    
+
+### 3.15 通过注解分别创建Dao, Service, Controller（控制器 - 控制网站跳转逻辑） ☆
+
+    ·通过给bean上添加某些注解，可以快速地将bean加入到ioc容器中
+
+    ·Spring提供了4个注解：
+
+        - @Controller ： 控制器，推荐给控制器层的组件添加（servlet）
+        - @Service    ： 业务逻辑，推荐给业务逻辑层的组件添加（service）
+        - @Repository ： 仓库，给数据库/持久化层的组件添加（dao）
+        - @Component  ： 组件，给难以分类为MVC的组件添加（util...）
+
+    ·某个类上添加上任何一个注解都能快速地将这个组件加入到IOC容器中
+
+    ·注解可以随意添加，Spring底层不会验证组件的业务功能是否符合注解定义
+
+    ·步骤：
+
+        1. 给组件添加以上4个注解中的任何一个
+        2. 配置开启Spring开启自动扫描（依赖context空间）
+
+            context:component-scan - 自动组件扫描
+            base-package - 自动扫描基础包下面所有添加了注解的类
+
+            ※注意 com, org .. 可能会把lib路径中的包也包含进去
+
+        3. 注解功能依赖于spring-aop包
+
+    ·使用注解加入到容器中的组件默认行为是相同的
+
+        1. id默认是类名首字母小写 - @Controller("bookController")指定
+        2. 作用域默认是单例
+
+### 3.16 使用context:include-filter指定扫描包时要包含的类
+
+    在context:component-scan标签体内
+        <context:include-filter type="" expression="" >
+
+    默认就是全部都要所以必须禁用默认规则才会生效
+
+    <context:component-scan base-package="pt.joja" use-default-filters="false">
+        <context:include-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+    </context:component-scan>
+
+### 3.17 使用context:exclude-filter指定扫描包时不包含的类
+
+    在context:component-scan标签体内
+        <context:exclude-filter type="" expression="" >
+
+    type:
+
+        - annotation 排除指定注解 ☆
+
+            <context:exclude-filter type="annotation" expression="org.springframework.stereotype.Controller"/>
+
+        - assignable 排除指定类 ☆
+
+            <context:exclude-filter type="assignable" expression="pt.joja.dao.BookDao"/>
+
+        - aspectj aspectj表达式
+        - custom 自定义TypeFilter
+        - regex 正则表达式
+
+### 3.18 使用@Autowired注解实现根据类型自动装配 ☆
+
+### 3.19 如果资源类型的bean不止一个，默认根据@Autowired注解标记的成员变量名作为id查找bean ☆
+
+### 3.20 如果根据成员变量名作为id还是找不到bean，可以使用@Qualifier注解明确指定目标bean的id ☆
+
+    (体现DI - 依赖注入的威力的时候了)
+
+    @Autowired - Spring会自动为这个属性赋值（从容器中找到对应的组件）
+
+        @Autowired
+        private BookService bookService;
+
+    ·工作步骤
+
+        1. 先按照类型从容器中去找对应组件
+
+            bookService = ioc.getBean(BookService.class)
+
+            -> 找到0个，NoSuchBeanDefinitionException
+            -> 找到1个，赋值结束
+            -> 找到多个，步骤2
+
+        2. 按照变量名作为id继续匹配
+
+            bookService = ioc.getBean("bookService")
+
+            -> 找到0个，回到步骤1，NoUniqueBeanDefinitionException
+            -> 找到1个，赋值结束
+
+    ·可以使用@Qualifier("beanId")来指定寻找的beanId
+    　-> 此指定的优先级高于上述2个默认规则，而且要求beanId确实为指定值
+
+### 3.21 在方法的形参位置使用@Qualifier注解
+
+    @Autowired注解在方法上时
+        - 在bean创建时方法会自动运行
+        - 方法上的每一个参数都会自动注入
+
+### 3.22 @Autowired注解的required属性指定某个属性不允许被设置
+
+    @Autowired(required = false) -> 找不到装配null
+    @Autowired(required = true)

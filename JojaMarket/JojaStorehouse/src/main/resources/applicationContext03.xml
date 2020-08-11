@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="car" class="pt.joja.bean.Car">
+        <property name="carName" value="BWM"/>
+        <property name="color" value="white"/>
+    </bean>
+
+    <bean id="person" class="pt.joja.bean.Person">
+        <!-- 手动赋值 -->
+        <property name="car" ref="car"/>
+    </bean>
+
+    <bean id="book1" class="pt.joja.bean.Book">
+        <property name="name" value="1000 questions"/>
+    </bean>
+    <bean id="book2" class="pt.joja.bean.Book"/>
+    <bean id="book3" class="pt.joja.bean.Book">
+        <property name="name" value="book3"/>
+    </bean>
+
+
+    <bean id="person2" class="pt.joja.bean.Person" autowire="byName"/>
+
+    <bean id="person3" class="pt.joja.bean.Person" autowire="byType"/>
+
+    <bean id="person4" class="pt.joja.bean.Person" autowire="constructor"/>
+
+    <bean id="person5" class="pt.joja.bean.Person">
+        <property name="age" value="#{25}"/>
+        <property name="salary" value="#{12345*12}"/>
+        <property name="lastName" value="#{book1.name}"/>
+        <property name="car" value="#{car}"/>
+        <property name="email" value="#{T(java.util.UUID).randomUUID().toString().substring(0,10)}@joja.com"/>
+        <property name="gender" value="#{book1.getName().toUpperCase()}"/>
+    </bean>
+
+
+</beans>

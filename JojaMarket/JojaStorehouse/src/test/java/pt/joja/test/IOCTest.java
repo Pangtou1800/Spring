@@ -5,6 +5,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import pt.joja.bean.Book;
+import pt.joja.bean.Person;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -12,7 +13,24 @@ import java.sql.SQLException;
 
 public class IOCTest {
 
-    ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext02.xml");
+    ApplicationContext applicationContext = new ClassPathXmlApplicationContext("applicationContext03.xml");
+
+    @Test
+    public void test5() {
+        Person person = applicationContext.getBean("person5", Person.class);
+        System.out.println(person);
+    }
+
+    @Test
+    public void test4() {
+        Person person = applicationContext.getBean("person2", Person.class);
+        System.out.println(person);
+        person = applicationContext.getBean("person3", Person.class);
+        System.out.println(person);
+        person = applicationContext.getBean("person4", Person.class);
+        System.out.println(person);
+    }
+
 
     @Test
     public void test3() {
