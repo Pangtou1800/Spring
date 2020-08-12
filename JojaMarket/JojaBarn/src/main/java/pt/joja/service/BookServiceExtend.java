@@ -13,6 +13,6 @@ public class BookServiceExtend extends BookService {
     @Override
     public void save(){
         System.out.println("BookServiceExtend调用DAO保存图书！");
-        bookDao.saveBook();
+        bookDao.save();
     }
 }

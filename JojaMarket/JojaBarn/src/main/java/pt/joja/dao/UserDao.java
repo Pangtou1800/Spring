@@ -1,18 +1,18 @@
 package pt.joja.dao;
 
 import org.springframework.stereotype.Repository;
-import pt.joja.bean.Book;
+import pt.joja.bean.User;
 
 @Repository
-public class BookDao extends BaseDao<Book>{
+public class UserDao extends BaseDao<User> {
 
     @Override
     public void save() {
-        System.out.println("图书保存了！");
+        System.out.println("用户保存了！");
     }
 
     @Override
     public String toString() {
-        return "BookDao{}";
+        return "UserDao{}";
     }
 }

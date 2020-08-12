@@ -5,11 +5,25 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 import pt.joja.dao.BookDao;
 import pt.joja.service.BookService;
+import pt.joja.service.UserService;
 import pt.joja.servlet.BookServlet;
 
 public class IOCTest {
 
     private ApplicationContext context = new ClassPathXmlApplicationContext("applicationContext.xml");
+
+    @Test
+    public void test03() {
+        BookService bookService = context.getBean("bookService", BookService.class);
+        UserService userService = context.getBean(UserService.class);
+
+        bookService.save();
+        userService.save();
+
+        System.out.println(bookService.getClass());
+        System.out.println(bookService.getClass().getSuperclass());
+        System.out.println(bookService.getClass().getGenericSuperclass());
+    }
 
     @Test
     public void test02(){

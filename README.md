@@ -4,12 +4,16 @@
 
     ·高度抽取可重用代码的一种设计
     ·高度的通用性
+
     
+
     工具类：
         commons-fileupload.jar
         commons-io.jar
         ...
+
     
+
     框架：
         抽取成一种高度可重用的，事务控制，强大的servlet，项目中的一些工具...
         多个可重用模块的集合，形成一个某个领域的整体解决方案
@@ -156,6 +160,7 @@
 ### 3.1 通过IOC容器创建对象，并为属性赋值
 
     HelloWorld
+
     
 
 ### 3.2 根据bean的类型从IOC容器中获取bean实例
@@ -446,6 +451,7 @@
         <property name="gender" value="#{book1.getName().toUpperCase()}"/>
     ·调用静态方法
         <property name="email" value="#{T(java.util.UUID).randomUUID().toString().substring(0,10)}@joja.com"/>
+
     
 
 ### 3.15 通过注解分别创建Dao, Service, Controller（控制器 - 控制网站跳转逻辑） ☆
@@ -546,6 +552,7 @@
 ### 3.21 在方法的形参位置使用@Qualifier注解
 
     @Autowired注解在方法上时
+
         - 在bean创建时方法会自动运行
         - 方法上的每一个参数都会自动注入
 
@@ -553,3 +560,73 @@
 
     @Autowired(required = false) -> 找不到装配null
     @Autowired(required = true)
+
+    ※几种自动装配的注解
+
+    @org.springframework.beans.factory.annotation.Autowired
+    @javax.annotation.Resource
+    @Inject => EJB标准下的注解
+
+| @Autowired | @Resource         |
+|------------|-------------------|
+| 功能强大    | 功能相对单一        |
+| Spring原生 | java标准，扩展性强 |
+
+#### 使用Spring的单元测试：
+
+    1. 导包：Spring的单元测试包 spring-test
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-test</artifactId>
+            <version>4.0.0.RELEASE</version>
+        </dependency>
+
+    2. 编写Spring测试类
+
+        ·为测试类class添加@Configuration注解，指定配置文件路径
+            @ContextConfiguration(locations="classpath:applicationContext.xml")
+
+                - org.springframework.test.context. ContextConfiguration
+
+        ·为测试类class添加@RunWith注解，指定Junit的Runner类为SpringJUnit4ClassRunner
+            @RunWith(SpringJUnit4ClassRunner.class)
+
+                - org.junit.runner.RunWith
+                - org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+
+### 3.23 泛型依赖注入 ☆
+
+    BaseService<T> {                        BaseDao<T> {}
+        @Autowired                              
+        private BaseDao<T> baseDao;
+    }
+
+    @Service                                @Repository
+    BookService extends BaseService<Book>   BookDao extends BaseDao<Book>
+        --> BaseDao<Book> baseDao  -------↗
+
+    @Service                                @Repository
+    UserService extends BaseService<User>   UserDao extends BaseDao<User>
+        --> BaseDao<User> baseDao  -------↗
+
+        可以理解为找到了继承BaseDao<T>的组件
+
+    ※jdk支持获取运行时泛型和父类
+
+    bookService.getClass()
+     - class pt.joja.service.BookService
+
+    bookService.getClass().getSuperclass()
+     - pt.joja.service.BaseService
+
+    bookService.getClass().getGenericSuperclass()
+     - pt.joja.service.BaseService<pt.joja.bean.Book>
+
+## 4. IOC总结
+
+    IOC是一个容器，帮我们管理所有的组件
+
+        1. 依赖注入：@Autowired自动装配
+        2. 某个组件要使用Spring提供的功能，它必须加入到容器中
+
