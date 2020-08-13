@@ -11,6 +11,7 @@
         <module>JojaWarehouse</module>
         <module>JojaStorehouse</module>
         <module>JojaBarn</module>
+        <module>JojaLab</module>
     </modules>
     <packaging>pom</packaging>
 

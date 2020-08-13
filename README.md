@@ -52,6 +52,8 @@
     AOP + Aspected：面向切面编程模块
 
         - spring-aop-4.0.0.RELEASE
+        - spring-aspects-4.0.0.RELEASE
+        - spring-instrument-4.0.0.RELEASE
 
     Data Access ：访问数据库
 
@@ -623,10 +625,152 @@
     bookService.getClass().getGenericSuperclass()
      - pt.joja.service.BaseService<pt.joja.bean.Book>
 
-## 4. IOC总结
+### 3.24 IOC总结
 
     IOC是一个容器，帮我们管理所有的组件
 
         1. 依赖注入：@Autowired自动装配
         2. 某个组件要使用Spring提供的功能，它必须加入到容器中
 
+## 第四章 AOP
+
+### 4.1 什么是AOP？
+
+    AOP(Aspect Oriented Programming) - 面向切面编程
+
+    指在程序运行期间，将某段代码动态地切入到指定方法的指定位置进行运行的编程方式
+
+    ·场景：
+        计算器运行计算方法时进行日志记录
+
+        Calculator 
+
+        - CalculatorImpl
+
+            ·add(int i, int j)
+            ·sub(int i, int j)
+
+        实装完成后想要为计算器添加日志记录功能
+
+        > 传统方案1：
+            在每一个实装方法里添加日志输出功能
+
+            缺点：
+                ·维护工作量很大
+                ·辅助功能和业务逻辑混在，耦合度高，增加代码复杂度
+
+        > 传统方案2：
+            编写LogUtil类，在每一个实装方法里通过LogUtil类来进行日志输出
+
+            一定程度上减少了维护工作量
+
+            缺点：
+                ·LogUtil类的方法设计困难
+                ·辅助功能和业务逻辑混在，耦合度高，增加代码复杂度
+
+        > AOP实现方案之 JDK动态代理
+            编写动态代理生成类
+
+                - CalculatorProxy
+
+                    ·Calculator getProxy(Calculator calculator)
+                    ·编写java.lang.reflect.InvocationHandler的实现类
+                    ·利用java.lang.reflect.Proxy.newProxyInstance()方法生成动态代理
+
+                ※也可以把LogUtil的呼出编写在动态代理当中
+
+            好处：
+                ·日志记录功能更加强大
+                ·与业务逻辑解耦
+
+            缺点：
+                ·编写困难
+                ·如果目标对象没有实现接口，则JDK默认的Proxy无法为它生成代理
+                 （代理对象和被代理对象唯一的关联就是它们实现了相同的接口）
+
+        > AOP实现方案之 Spring动态代理
+
+            避免了JDK动态代理的缺点：
+                ·编写简单，简化了AOP编程的过程
+                ·不要求目标对象实现接口
+
+### 4.2 AOP专业术语
+
+    Calculator
+
+       add        sub        mul        div                        LogUtil - 切面类
+        |          |          |          |
+     [start]     start      start      start    -  横切关注点1  ->  通知方法1
+        |          |          |          |
+      return     return    [return]    return   -  横切关注点2  ->  通知方法2
+        |          |          |          |
+    exception   exception  exception  exception -  横切关注点3  ->  通知方法3
+        |          |          |          |
+     finally    finally    finally   [finally]  -  横切关注点4  ->  通知方法4
+        ↑                                ↑
+      连接点                           切入点
+
+    切入点：
+
+        - 在众多连接点中选出的真正感兴趣的点
+
+    切入点表达式：
+
+        - 选取切入的的表达式
+
+### 4.3 Spring AOP
+
+    课题：
+        如何将切面类（LogUtil）的日志方法在目标程序的各方法运行阶段进行调用？
+
+    步骤：
+
+        1. 导包
+
+            Core Container：核心容器（IOC）
+
+                - Beans spring-beans-4.0.0.RELEASE
+                - Core spring-core-4.0.0.RELEASE
+                - Context spring-core-4.0.0.RELEASE
+                - SpEL spring-expression-4.0.0.RELEASE
+
+            AOP + Aspected：面向切面编程模块
+
+                - spring-aop-4.0.0.RELEASE
+                - spring-aspects-4.0.0.RELEASE
+
+            加强版AOP包(即使目标对象没有实现接口也能创建动态代理)
+
+                - com.springsource.net.sf.cglib-2.2.0.jar
+                - com.springsource.org.aopalliance-1.0.0.jar
+                - com.springsource.org.aspectj.weaver-1.6.8.RELEASE.jar
+
+        2. 写配置
+            - 将目标类和切面类加入IOC容器
+            - 指定切面类@Aspect
+            - 指定切面类方法的运行时机
+
+            try {
+                @Before - 前置通知
+                method.invoke();
+                @AfterReturning - 返回通知
+            } catch (Exception e) {
+                @AfterThrowing - 异常通知
+            } finally {
+                @After - 后置通知
+            }
+
+            @Round - 环绕通知
+
+            切入点表达式：
+                @Before("execution(public int pt.joja.lab.impl.CalculatorSimpleImpl.*(int, int))")
+
+        3. 开启基于注解的AOP模式
+
+            <aop:aspectj-autoproxy proxy-target-class="false"/>
+            proxy-target-class
+            　true - CGLIB基于类的代理对象
+              false - sun的原生Proxy代理对象
+              不显式指定时则根据有没有Interface自动判断
+
+            Spring发现一个对象被AOP切面关注之后，就会用代理对象取代原生对象存入容器中
