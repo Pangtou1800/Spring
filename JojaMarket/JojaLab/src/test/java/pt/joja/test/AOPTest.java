@@ -15,6 +15,14 @@ public class AOPTest {
     ApplicationContext ioc = new ClassPathXmlApplicationContext("applicationContext.xml");
 
     @Test
+    public void test3() {
+        Calculator calculator = ioc.getBean(Calculator.class);
+        System.out.println(calculator.add(3, 5));
+        // calculator.div(8, 0);
+    }
+
+
+    @Test
     public void test2() {
         Calculator calculator = ioc.getBean(Calculator.class);
         System.out.println(calculator);

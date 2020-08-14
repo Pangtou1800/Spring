@@ -774,3 +774,138 @@
               不显式指定时则根据有没有Interface自动判断
 
             Spring发现一个对象被AOP切面关注之后，就会用代理对象取代原生对象存入容器中
+
+### 4.4 Spring AOP细节
+
+    1. 细节一
+
+        有接口时转换为接口类，没有接口时转换为本类
+
+    2. 细节二
+
+        切入点表达式的写法：
+
+            - 固定格式：
+
+                execution(访问权限符 返回值类型 方法全类名(参数表))
+
+            - 通配符：
+
+                1. *匹配符
+
+                    > 匹配一个或者多个字符
+                        MyMath*.method()
+                        MyMath*r.method()
+                    > 匹配任意一个参数类型（不改变参数个数）
+                        MyMath.method(int, *)
+                    > 匹配任意一层路径(以*开头的路径则为任意路径)
+                        pt.joja.*.MyMath.method(int, int)
+
+                    > 不能在权限位置使用（省略即为public）
+
+                2. ..匹配符
+
+                    > 匹配任意多个参数、任意参数类型
+                        MyMath.method(..)
+                    > 匹配任意多层路径
+                        pt.joja..MyMath.method(int, int)
+
+                3. &&, ||, ! 逻辑交集
+                    - execution(...)&&execution(...)
+                    - execution(...)||execution(...)
+                    - !execution(...)
+
+        最精确的写法：
+            execution(public int pt.joja.lab.impl.CaluculatorSimpleImpl.add(int,int))
+        最模糊的写法：
+            execution(* *.*(..))    !不要写
+
+    3. 细节三
+
+        通知方法的执行顺序
+
+            - 正常返回时：
+
+                @Before
+                @After
+                @AfterReturning
+
+            - 异常返回时：
+
+                @Before
+                @After
+                @AfterThrowing
+
+    4. 细节四
+
+        在通知方法运行时获取目标方法的详细信息
+
+            - 为通知方法的参数列表写一个参数JoinPoint joinPoint即可
+
+                @Before("execution(* pt.joja.lab.impl.*.*(..))")
+                public static void logStart(JoinPoint joinPoint)
+
+            - 添加参数用于接收返回值，并在@AfterReturning中指明该属性
+
+                @AfterReturning(value="execution(* pt.joja.lab.impl.*.*(..))",returning="result")
+                public static void logReturn(JoinPoint joinPoint, Object result)
+
+            - 添加参数用于接收异常，并在@AfterThrowing中指明该属性
+
+                @AfterThrowing(value="execution(* pt.joja.lab.impl.*.*(..))", throwing="exception")
+                public static void logException(JoinPoint joinPoint, Exception exception)
+
+        ※如果参数的Exception·Result类型明确到了具体类型，
+          则无法Cast到该类型的异常·返回值出现时，
+                @AfterReturning
+                @AfterThrowing
+          通知方法不会被呼出
+
+        ※Spring对通知方法的要求不严格，不局限于static, void等，但是参数列表要严格书写
+            JoinPoint以外的参数都要声明用途
+
+    5. 抽取可重用切入点表达式
+        > 随便声明一个没有实现的返回void的空方法，添加@Pointcut标签
+
+            @Pointcut("execution(* pt.joja.lab.impl.*.*(..))")
+            public void myPoint() {}
+
+        > 在想要重用的表达上指明该方法
+
+            @Before("myPoint()")
+            public void logStart(JoinPoint joinPoint)
+
+### 4.5 环绕通知
+
+    环绕通知是Spring中最强大的通知，基本相当于手写动态代理
+
+    try {
+        @Before
+        method.invoke()
+        @AfterReturning
+    } catch (Exception e) {
+        @AfterThrowing
+    } finally {
+        @After
+    }
+
+    四合一就是环绕通知@Around
+
+    @Around("myPoint()")
+    public Object logAround(ProceedingJoinPoint pjp) {
+        Object[] args = pjp.getArgs();
+        try {
+            System.out.println("around before..");
+            Object result = pjp.proceed(args);
+            System.out.println("around afterReturn..");
+            return result;
+        } catch (Throwable throwable) {
+            System.out.println("around afterThrowing..");
+            throwable.printStackTrace();
+            throw new RuntimeException(throwable);
+        } finally {
+            System.out.println("around after..");
+        }
+    }
+
+    和动态代理如出一辙
