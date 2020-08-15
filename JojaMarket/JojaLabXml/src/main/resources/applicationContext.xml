@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd">
+
+    <aop:aspectj-autoproxy/>
+
+    <bean id="mathCalculator" class="pt.joja.lab.impl.CalculatorSimpleImpl"/>
+    <bean id="validateAspect" class="pt.joja.lab.ValidateAspect"/>
+    <bean id="logAspect" class="pt.joja.lab.LogUtil"/>
+
+    <aop:config>
+        <aop:pointcut id="jojaLabAll" expression="execution(* pt.joja.lab.*.*(..))"/>
+        <aop:aspect ref="logAspect" order="1">
+            <aop:before method="logStart" pointcut-ref="jojaLabAll"/>
+            <aop:after method="logEnd" pointcut-ref="jojaLabAll"/>
+            <aop:after-returning method="logReturn" returning="result" pointcut-ref="jojaLabAll"/>
+            <aop:after-throwing method="logException" throwing="exception" pointcut-ref="jojaLabAll"/>
+            <aop:around method="logAround" pointcut-ref="jojaLabAll"/>
+        </aop:aspect>
+        <aop:aspect ref="validateAspect" order="2">
+            <aop:before method="validateStart" pointcut-ref="jojaLabAll"/>
+            <aop:after method="validateAfter" pointcut-ref="jojaLabAll"/>
+            <aop:after-returning method="validateAfterReturning" returning="result" pointcut-ref="jojaLabAll"/>
+            <aop:after-throwing method="validateAfterThrowing" throwing="throwable" pointcut-ref="jojaLabAll"/>
+        </aop:aspect>
+    </aop:config>
+
+</beans>

@@ -3,7 +3,9 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/JojaBarn/JojaBarn.iml" filepath="$PROJECT_DIR$/JojaBarn/JojaBarn.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JojaJdbcTemplate/JojaJdbcTemplate.iml" filepath="$PROJECT_DIR$/JojaJdbcTemplate/JojaJdbcTemplate.iml" />
       <module fileurl="file://$PROJECT_DIR$/JojaLab/JojaLab.iml" filepath="$PROJECT_DIR$/JojaLab/JojaLab.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JojaLabXml/JojaLabXml.iml" filepath="$PROJECT_DIR$/JojaLabXml/JojaLabXml.iml" />
       <module fileurl="file://$PROJECT_DIR$/JojaMarket.iml" filepath="$PROJECT_DIR$/JojaMarket.iml" />
       <module fileurl="file://$PROJECT_DIR$/JojaStorehouse/JojaStorehouse.iml" filepath="$PROJECT_DIR$/JojaStorehouse/JojaStorehouse.iml" />
       <module fileurl="file://$PROJECT_DIR$/JojaWarehouse/JojaWarehouse.iml" filepath="$PROJECT_DIR$/JojaWarehouse/JojaWarehouse.iml" />

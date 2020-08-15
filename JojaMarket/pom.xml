@@ -12,6 +12,8 @@
         <module>JojaStorehouse</module>
         <module>JojaBarn</module>
         <module>JojaLab</module>
+        <module>JojaLabXml</module>
+        <module>JojaJdbcTemplate</module>
     </modules>
     <packaging>pom</packaging>
 

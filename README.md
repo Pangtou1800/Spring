@@ -865,6 +865,7 @@
             JoinPoint以外的参数都要声明用途
 
     5. 抽取可重用切入点表达式
+
         > 随便声明一个没有实现的返回void的空方法，添加@Pointcut标签
 
             @Pointcut("execution(* pt.joja.lab.impl.*.*(..))")
@@ -909,3 +910,179 @@
     }
 
     和动态代理如出一辙
+
+### 4.6 多个切面同时切入时的运行顺序
+
+    -------------------------------------------->
+    aspect1:Before                  aspect1:After
+        aspect2:Before          aspect2:After
+            ...             ...
+                object.method
+
+    ※标记配置时切面间的顺序默认由字母排序决定，
+        可以加@Order注解指定顺序
+
+        @Order(1) -> @Order(2) ...
+
+        around before..
+        [LogUtil@Before]add方法开始执行，参数:[3, 5]
+        [Validate@Before]add方法开始执行，参数:[3, 5]
+        add...
+        [Validate@After]add方法结束了
+        [Validate@AfterReturning]add方法执行结束，结果是：8
+        around afterReturn..
+        around after..
+        [LogUtil@After]add方法结束了
+        [LogUtil@AfterReturning]add方法执行结束，结果是：8
+
+        环绕通知会抢在本切面类的各阶段通知方法前执行，
+        但是不会影响切面之间的方法执行顺序
+
+### 4.7 AOP的应用场景
+
+    1. AOP加日志保存到数据库等
+
+    2. AOP做权限验证
+
+    3. AOP做安全检查
+
+    4. AOP做DB事务控制
+
+### 4.8 基于XML的AOP配置
+
+    1. 基于注解的时候的步骤：
+
+        - 将目标类和切面类都加入容器中
+        - 用@Aspect标记切面类
+        - 用五个注解通知来配置各方法的运行时机
+        - 开启基于注解的AOP功能
+
+    2. 基于XML的配置步骤都是一样的：
+
+        <aop:aspectj-autoproxy/>
+
+        <bean id="mathCalculator" class="pt.joja.lab.impl.CalculatorSimpleImpl"/>
+        <bean id="validateAspect" class="pt.joja.lab.ValidateAspect"/>
+        <bean id="logAspect" class="pt.joja.lab.LogUtil"/>
+
+        <aop:config>
+            <aop:pointcut id="jojaLabAll" expression="execution(* pt.joja.lab.*.*(..))"/>
+            <aop:aspect ref="logAspect" order="1">
+                <aop:before method="logStart" pointcut-ref="jojaLabAll"/>
+                <aop:after method="logEnd" pointcut-ref="jojaLabAll"/>
+                <aop:after-returning method="logReturn" returning="result" pointcut-ref="jojaLabAll"/>
+                <aop:after-throwing method="logException" throwing="exception" pointcut-ref="jojaLabAll"/>
+                <aop:around method="logAround" pointcut-ref="jojaLabAll"/>
+            </aop:aspect>
+            <aop:aspect ref="validateAspect" order="2">
+                <aop:before method="validateStart" pointcut-ref="jojaLabAll"/>
+                <aop:after method="validateAfter" pointcut-ref="jojaLabAll"/>
+                <aop:after-returning method="validateAfterReturning" returning="result" pointcut-ref="jojaLabAll"/>
+                <aop:after-throwing method="validateAfterThrowing" throwing="throwable" pointcut-ref="jojaLabAll"/>
+            </aop:aspect>
+        </aop:config>
+
+    3. 注解 VS 配置
+
+        注解：
+
+            - 快速方便
+
+        配置：
+
+            - 功能完善
+            - 约定：重要的用配置，不重要的用注解
+
+## 第五章 声明式事务
+
+        声明式事务：
+            向Spring声明某个方法为事务方法即可，由Spring来进行事务控制
+
+            BookService {
+                @(Transaction here~)
+                public void checkout(...) {
+                    ...
+                }
+            }
+
+        编程式事务：
+            TransactionFilter {
+                try {
+                    //获取连接
+                    //设置非自动提交
+                    chain.doFilter();
+                    //正确
+                    //提交
+                } catch(Exception e) {
+                    //回滚
+                } finally {
+                    //关闭连接，释放资源
+                }
+            }
+
+            ※而且作为Servlet层面的控制结构处理得太早，
+              会拦截DB请求无关操作
+
+        总结：
+            事务管理代码的固定模式作为一种横切关注点，很容易通过AOP方法模式化，
+            进而借助Spring AOP框架实现声明式事务管理。
+
+            ·事务处理流程非常固定
+            ·AOP的处理流程和Filter的处理流程非常契合
+            ·Spring甚至为不同的持久化框架预备了不同的事务管理器
+             ※事务管理器就是一个切面
+
+### 5.1 准备工作
+
+    使用SpringJdbcTemplate来操作数据库，作为学习过程
+
+    1. 导入Spring的数据库模块
+
+    2. 在IOC容器中配置数据源
+
+        - Jdbc spring-jdbc-4.0.0.RELEASE
+        - ORM spring-orm-4.0.0.RELEASE
+        - transaction spring-tx-4.0.0.RELEASE
+
+    3. 配置dataSource, jdbcTemplate, dao在容器中后，Dao的调用和生成就非常简单了
+
+    4. 补充：
+
+        具名参数：
+            区别于占位符参数
+            insert into employee(emp_name, salary) values(:_emp_name, :_salary)
+
+        Spring提供了NamedParameterJdbcTemplate来实现具名功能
+
+        将Object[] => Map<String, Object>作为参数即可
+
+### 5.2 声明式事务的环境搭建
+
+    1. 创建表account, book, book_stock
+
+    2. 编写BookDao          和 BookService
+        - updateBalance         - checkout
+        - getPrice
+        - updateStock
+
+    3. 验证此时的checkout方法没有事务特性（updateBalance和updateStock）
+
+### 5.3 为方法添加事务
+
+    1. 配置事务管理器bean
+    目前使用DataSourceTransactionManager
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    2. 开启基于注解的事务管理
+
+    <tx:annotation-driven transaction-manager="transactionManager" />
+
+    3. 给事务方法加注解
+    @Transactional
+    public void checkout(String username, String isbn, int amount)
+
+        此方法执行前后即会被Spring自动地进行事务管理
+
