@@ -8,6 +8,7 @@
       <module fileurl="file://$PROJECT_DIR$/JojaLabXml/JojaLabXml.iml" filepath="$PROJECT_DIR$/JojaLabXml/JojaLabXml.iml" />
       <module fileurl="file://$PROJECT_DIR$/JojaMarket.iml" filepath="$PROJECT_DIR$/JojaMarket.iml" />
       <module fileurl="file://$PROJECT_DIR$/JojaStorehouse/JojaStorehouse.iml" filepath="$PROJECT_DIR$/JojaStorehouse/JojaStorehouse.iml" />
+      <module fileurl="file://$PROJECT_DIR$/JojaTransaction/JojaTransaction.iml" filepath="$PROJECT_DIR$/JojaTransaction/JojaTransaction.iml" />
       <module fileurl="file://$PROJECT_DIR$/JojaWarehouse/JojaWarehouse.iml" filepath="$PROJECT_DIR$/JojaWarehouse/JojaWarehouse.iml" />
     </modules>
   </component>

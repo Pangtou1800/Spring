@@ -34,9 +34,4 @@ public class BookDao {
         String sql = "update book_stock set stock = stock - ? where isbn = ?";
         jdbcTemplate.update(sql, stock, isbn);
     }
-
-    public void updatePrice(String isbn, int price) {
-        String sql = "update book set price = ? where isbn = ?";
-        jdbcTemplate.update(sql, price, isbn);
-    }
 }

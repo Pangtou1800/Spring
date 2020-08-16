@@ -1,24 +1,23 @@
 package pt.joja.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import pt.joja.dao.BookDao;
 
-@Service
-public class BookService {
+public class BookServiceXml {
 
-    @Autowired
     BookDao bookDao;
 
-    // @Transactional(timeout=3)
-    // @Transactional(readOnly = true)
-    // @Transactional(noRollbackFor = {ArithmeticException.class, NullPointerException.class})
-    // @Transactional(rollbackFor = { java.io.IOException.class })
-    // @Transactional(isolation = Isolation.READ_UNCOMMITTED)
-    @Transactional(propagation = Propagation.REQUIRED)
+    public BookDao getBookDao() {
+        return bookDao;
+    }
+
+    public void setBookDao(BookDao bookDao) {
+        this.bookDao = bookDao;
+    }
+
     public void checkout(String username, String isbn, int amount) {
 
         // 1. 减库存
@@ -29,14 +28,14 @@ public class BookService {
         int totalPrice = price * amount;
         bookDao.updateBalance(username, totalPrice);
 
+        // int num = 10 / 0;
+
     }
 
-    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void updatePrice(String isbn, int price) {
         bookDao.updatePrice(isbn, price);
     }
 
-    @Transactional(readOnly = true, isolation = Isolation.READ_COMMITTED)
     public int getPrice() {
         int price = bookDao.getPrice("ISBN-002");
         return price;

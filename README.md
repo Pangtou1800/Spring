@@ -1070,6 +1070,7 @@
 ### 5.3 为方法添加事务
 
     1. 配置事务管理器bean
+
     目前使用DataSourceTransactionManager
 
     <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
@@ -1081,8 +1082,128 @@
     <tx:annotation-driven transaction-manager="transactionManager" />
 
     3. 给事务方法加注解
+
     @Transactional
     public void checkout(String username, String isbn, int amount)
 
         此方法执行前后即会被Spring自动地进行事务管理
 
+### 5.4 事务细节
+
+    1. isolation - Isolation
+
+        事务的隔离级别
+
+        @Transactional(isolation = Isolation.READ_UNCOMMITTED)
+
+    2. propagation - Propagation
+
+        事务的传播行为 - 事务的传播 + 事务的行为
+
+            如果有多个事务进行嵌套运行，则子事务是否要大事务公用一个事务
+
+            AService{
+                tx_a() {
+                    ...
+                    tx_b();
+                    tx_c();
+                }
+            }
+
+            tx_c()出现异常时tx_b()要不要一起回滚？
+
+        - REQUIRED (默认)
+
+            如果有事务在运行，那么就在该事务内运行；如果没有，则创建一个事务
+
+        - REQUIRED_NEW
+
+            方法必须在自己独立的事务内运行。如果有已有事务，则应该将它挂起
+
+        - SUPPORTS
+
+            如果有事务就在事务里运行；如果没有就不在事务里运行
+
+        - NOT_SUPPORTED
+
+            方法不应该在事务里运行。如果已有事务，则应该将它挂起
+
+        - MANDATORY
+
+            方法必须在事务内部运行。如果没有事务，则抛出异常
+
+        - NEVER
+
+            方法不应该在事务里运行。如果已有事务，就抛出异常
+
+        - NESTED
+
+            如果有事务在运行，那么就在该事务的嵌套事务内运行；如果没有，则创建一个事务
+            ※需要嵌套事务功能的支持（数据库的保存点功能）
+
+            另外，子事务的其他属性沿用大事务
+
+        实现原理：
+            REQUIRED ： 将上级Connectio传递
+            REQUIRES_NEW： 新获得一个Connection
+
+    前提：
+        运行时异常默认回滚
+        编译时异常默认不回滚
+
+    3. noRollbackFor - Class[] / noRollbackForClassName - String[]    
+
+        排除不需要回滚的运行时异常
+
+        @Transactional(noRollbackFor = {ArithmeticException.class, NullPointerException.class})
+
+    4. rollbackFor - Class[] / rollbackForClassName - String[]
+
+        指定需要回滚的编译时异常
+
+        @Transactional(rollbackFor = { java.io.IOException.class })
+
+    5. readOnly - boolean
+
+        设置事务为只读属性
+        进行事务优化，设为true后可以加快查询速度
+
+        @Transactional(readOnly = true)
+
+    6. timeout - int
+
+        事务超出指定时长后自动终止并回滚
+        单位：s
+
+        @Transactional(timeout=3)
+
+    ※有事务标记的业务逻辑，也是经由代理控制的
+
+### 5.5 基于Xml配置的事务声明
+
+    1. 配置事务管理器
+
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+        <property name="dataSource" ref="dataSource"/>
+    </bean>
+
+    2. 将事务管理器指定为一个切面
+        - 将事务管理器配置为一个事务建议（事务增强）
+        <tx:advice id="transactionInterceptor" transaction-manager="transactionManager">
+            <tx:attributes>
+                <tx:method name="checkout" propagation="REQUIRED"/>
+                <tx:method name="get*" read-only="true"/>
+                <tx:method name="update*"/>
+            </tx:attributes>
+        </tx:advice>
+
+        - 给切面指定该事务建议
+        <aop:config>
+            <aop:pointcut id="serviceMethod" expression="execution(* pt.joja.service.*Xml.*(..))"/>
+            <aop:advisor advice-ref="transactionInterceptor" pointcut-ref="serviceMethod"/>
+        </aop:config>
+
+    3. 取舍
+        重要的用配置，不重要的用注解
+
+        注解可以使用通配符
